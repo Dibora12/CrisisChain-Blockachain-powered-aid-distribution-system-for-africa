@@ -47,15 +47,24 @@ export const useCreateDistribution = () => {
     mutationFn: async (distribution: Partial<Distribution>) => {
       if (!user) throw new Error('User not authenticated');
       
+      // Ensure required fields are present
+      if (!distribution.aid_request_id || !distribution.recipient_id || !distribution.amount) {
+        throw new Error('Aid request ID, recipient ID, and amount are required');
+      }
+      
       // Simulate Midnight blockchain transaction
       const midnightTxHash = `midnight_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       
       const { data, error } = await supabase
         .from('distributions')
         .insert({
-          ...distribution,
+          aid_request_id: distribution.aid_request_id,
           distributor_id: user.id,
+          recipient_id: distribution.recipient_id,
+          amount: distribution.amount,
+          token_contract_address: distribution.token_contract_address,
           midnight_tx_hash: midnightTxHash,
+          shielded_memo: distribution.shielded_memo,
           status: 'pending',
         })
         .select()

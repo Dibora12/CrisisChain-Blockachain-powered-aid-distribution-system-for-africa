@@ -46,16 +46,28 @@ export const useCreateAidToken = () => {
 
   return useMutation({
     mutationFn: async (token: Partial<AidToken>) => {
+      // Ensure required fields are present
+      if (!token.recipient_id || !token.amount || !token.token_type) {
+        throw new Error('Recipient ID, amount, and token type are required');
+      }
+
       const midnightTxHash = `midnight_token_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       const contractAddress = `0x${Math.random().toString(16).substr(2, 40)}`;
+      const tokenId = `AID_${Date.now()}`;
       
       const { data, error } = await supabase
         .from('aid_tokens')
         .insert({
-          ...token,
-          token_id: `AID_${Date.now()}`,
+          recipient_id: token.recipient_id,
+          token_id: tokenId,
+          amount: token.amount,
+          token_type: token.token_type as any,
           contract_address: contractAddress,
           midnight_tx_hash: midnightTxHash,
+          restrictions: token.restrictions,
+          expires_at: token.expires_at,
+          is_active: token.is_active !== false,
+          used_amount: token.used_amount || 0,
         })
         .select()
         .single();

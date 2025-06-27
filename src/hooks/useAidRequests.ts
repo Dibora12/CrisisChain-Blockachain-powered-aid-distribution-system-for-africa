@@ -49,11 +49,24 @@ export const useCreateAidRequest = () => {
     mutationFn: async (request: Partial<AidRequest>) => {
       if (!user) throw new Error('User not authenticated');
       
+      // Ensure required fields are present
+      if (!request.request_type || !request.amount || !request.location) {
+        throw new Error('Request type, amount, and location are required');
+      }
+
       const { data, error } = await supabase
         .from('aid_requests')
         .insert({
-          ...request,
           user_id: user.id,
+          request_type: request.request_type as any,
+          amount: request.amount,
+          location: request.location,
+          description: request.description,
+          urgency_level: request.urgency_level || 3,
+          need_score: request.need_score || 0,
+          status: request.status as any || 'pending',
+          zk_proof_hash: request.zk_proof_hash,
+          midnight_tx_hash: request.midnight_tx_hash,
         })
         .select()
         .single();

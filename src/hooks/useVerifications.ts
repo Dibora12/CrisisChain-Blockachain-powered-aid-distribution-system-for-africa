@@ -47,6 +47,11 @@ export const useCreateVerification = () => {
     mutationFn: async (verification: Partial<UserVerification>) => {
       if (!user) throw new Error('User not authenticated');
       
+      // Ensure required fields are present
+      if (!verification.verifier_id || !verification.verification_type) {
+        throw new Error('Verifier ID and verification type are required');
+      }
+      
       // Generate zero-knowledge proof hash (simulated)
       const zkProofHash = `zk_${Date.now()}_${Math.random().toString(36).substr(2, 16)}`;
       const midnightProofTx = `midnight_proof_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -54,11 +59,14 @@ export const useCreateVerification = () => {
       const { data, error } = await supabase
         .from('user_verifications')
         .insert({
-          ...verification,
           user_id: user.id,
+          verifier_id: verification.verifier_id,
+          verification_type: verification.verification_type,
           zk_proof_hash: zkProofHash,
           midnight_proof_tx: midnightProofTx,
           status: 'pending',
+          metadata: verification.metadata,
+          expires_at: verification.expires_at,
         })
         .select()
         .single();
