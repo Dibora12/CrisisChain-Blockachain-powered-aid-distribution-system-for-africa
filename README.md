@@ -20,7 +20,7 @@ CrisisChain is an innovative web and mobile platform that leverages blockchain t
 
 - **Frontend**: React.js / React Native
 - **Backend**: Supabase
-- **Blockchain**: Cardano (Smart Contracts via Plutus)
+- **Blockchain**: midnight (Smart Contracts)
 - **Database**: PostgreSQL (Supabase)
 - **Wallet**: Lace Wallet Integration
 - **Authentication**: Supabase Auth with JWT
