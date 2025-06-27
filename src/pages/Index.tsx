@@ -1,16 +1,73 @@
 
-import { Layout } from "@/components/layout/Layout";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { AidDistributionMap } from "@/components/dashboard/AidDistributionMap";
 import { DistributionChart } from "@/components/dashboard/DistributionChart";
 import { RecentTransactions } from "@/components/dashboard/RecentTransactions";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import { Link } from "react-router-dom";
 import { 
   Users, ShieldCheck, CreditCard, BarChart4, Fingerprint, 
   DownloadCloud, ListChecks, ArrowRight 
 } from "lucide-react";
 
 export default function Index() {
+  const { user } = useAuth();
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center p-4">
+        <div className="text-center text-white max-w-4xl mx-auto">
+          <div className="flex items-center justify-center mb-8">
+            <div className="bg-primary text-primary-foreground p-3 rounded-md mr-4">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="currentColor" />
+                <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
+            <div>
+              <h1 className="text-5xl font-bold mb-2">CrisisChain</h1>
+              <p className="text-xl text-slate-300">Blockchain-Powered Aid Distribution for Africa</p>
+            </div>
+          </div>
+          
+          <p className="text-lg mb-8 text-slate-200 max-w-2xl mx-auto">
+            Secure, transparent, and efficient distribution of humanitarian aid using blockchain technology. 
+            Connect donors, NGOs, governments, and local communities in a decentralized ecosystem.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button asChild size="lg" className="bg-primary hover:bg-primary/90">
+              <Link to="/auth">Get Started</Link>
+            </Button>
+            <Button variant="outline" size="lg" className="border-white text-white hover:bg-white hover:text-slate-900">
+              Learn More
+            </Button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
+            <div className="text-center">
+              <Fingerprint className="h-12 w-12 mx-auto mb-4 text-primary" />
+              <h3 className="text-xl font-bold mb-2">Crisis ID Verification</h3>
+              <p className="text-slate-300">Secure, biometric-based identity verification for displaced individuals.</p>
+            </div>
+            <div className="text-center">
+              <CreditCard className="h-12 w-12 mx-auto mb-4 text-primary" />
+              <h3 className="text-xl font-bold mb-2">Aid Token Distribution</h3>
+              <p className="text-slate-300">Stablecoin-like tokens for essential needs distribution with smart contracts.</p>
+            </div>
+            <div className="text-center">
+              <Users className="h-12 w-12 mx-auto mb-4 text-primary" />
+              <h3 className="text-xl font-bold mb-2">Community Verification</h3>
+              <p className="text-slate-300">Leveraging community leaders and witnesses for DAO-based identity verification.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col md:flex-row items-start justify-between mb-6">
