@@ -1,4 +1,3 @@
-
 import { Bell, Menu, Wallet, X, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useCallback, useEffect } from "react";
@@ -20,7 +19,7 @@ export function Header() {
 
   useEffect(() => {
     const checkLace = () => {
-      const isInstalled = typeof window.cardano !== 'undefined' && window.cardano.lace;
+      const isInstalled = typeof window.cardano !== 'undefined' && typeof window.cardano.lace !== 'undefined';
       setIsLaceInstalled(isInstalled);
     };
     
@@ -43,7 +42,7 @@ export function Header() {
     }
 
     try {
-      const api = await window.cardano.lace.enable();
+      const api = await window.cardano.lace!.enable();
       const addresses = await api.getUsedAddresses();
       if (addresses.length > 0) {
         const address = addresses[0];
