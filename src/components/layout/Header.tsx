@@ -14,6 +14,7 @@ export function Header() {
   const [isWalletConnected, setIsWalletConnected] = useState(false);
   const [walletAddress, setWalletAddress] = useState<string>("");
   const [isLaceInstalled, setIsLaceInstalled] = useState(false);
+  const [midnightConnected, setMidnightConnected] = useState(false);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
@@ -62,6 +63,12 @@ export function Header() {
         toast.success("Lace wallet connected successfully!", {
           description: `Connected with address ${address.slice(0, 8)}...${address.slice(-6)}`
         });
+
+        // Simulate Midnight connection after Cardano wallet connection
+        setTimeout(() => {
+          setMidnightConnected(true);
+          toast.success("Midnight network connected for private transactions");
+        }, 1000);
       }
     } catch (error) {
       console.error("User denied wallet connection or error occurred:", error);
@@ -75,6 +82,7 @@ export function Header() {
     await signOut();
     setIsWalletConnected(false);
     setWalletAddress("");
+    setMidnightConnected(false);
     toast.success("Signed out successfully");
     navigate("/auth");
   };
@@ -127,9 +135,17 @@ export function Header() {
                     </span>
                   </Button>
                 ) : (
-                  <div className="hidden md:flex items-center space-x-2 px-3 py-2 bg-green-100 text-green-800 rounded-md text-sm">
-                    <Wallet className="h-4 w-4" />
-                    <span>{formatAddress(walletAddress)}</span>
+                  <div className="hidden md:flex items-center space-x-2">
+                    <div className="flex items-center space-x-2 px-3 py-2 bg-green-100 text-green-800 rounded-md text-sm">
+                      <Wallet className="h-4 w-4" />
+                      <span>{formatAddress(walletAddress)}</span>
+                    </div>
+                    {midnightConnected && (
+                      <div className="flex items-center space-x-1 px-2 py-1 bg-purple-100 text-purple-800 rounded-md text-xs">
+                        <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
+                        <span>Midnight</span>
+                      </div>
+                    )}
                   </div>
                 )}
                 
