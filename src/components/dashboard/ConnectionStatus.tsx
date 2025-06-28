@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle, XCircle, Loader2, Wallet, Database } from 'lucide-react';
+import { CheckCircle, XCircle, Loader2, Wallet, Database, ExternalLink } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -18,7 +18,9 @@ export function ConnectionStatus() {
   useEffect(() => {
     checkSupabaseConnection();
     checkLaceInstalled();
-    checkExistingWalletAddress();
+    if (user) {
+      checkExistingWalletAddress();
+    }
   }, [user]);
 
   const checkSupabaseConnection = async () => {
@@ -31,8 +33,11 @@ export function ConnectionStatus() {
   };
 
   const checkLaceInstalled = () => {
-    const isInstalled = typeof window.cardano !== 'undefined' && window.cardano.lace;
+    const isInstalled = typeof window !== 'undefined' && 
+                       typeof window.cardano !== 'undefined' && 
+                       typeof window.cardano.lace !== 'undefined';
     setLaceInstalled(isInstalled);
+    console.log('Lace installed:', isInstalled);
   };
 
   const checkExistingWalletAddress = async () => {
@@ -54,6 +59,10 @@ export function ConnectionStatus() {
     }
   };
 
+  const openLaceWebsite = () => {
+    window.open('https://www.lace.io/', '_blank');
+  };
+
   const connectWallet = async () => {
     if (!user) {
       toast.error('Please sign in first');
@@ -61,11 +70,11 @@ export function ConnectionStatus() {
     }
 
     if (!laceInstalled) {
-      toast.error('Lace wallet not found', {
-        description: 'Please install Lace wallet extension',
+      toast.error('Lace Wallet is not installed', {
+        description: 'Please install Lace Wallet to continue',
         action: {
           label: 'Install Lace',
-          onClick: () => window.open('https://www.lace.io/', '_blank')
+          onClick: openLaceWebsite
         }
       });
       return;
@@ -80,7 +89,7 @@ export function ConnectionStatus() {
       const addresses = await api.getUsedAddresses();
       console.log('Addresses retrieved:', addresses);
       
-      if (addresses.length > 0) {
+      if (addresses && addresses.length > 0) {
         const address = addresses[0];
         setWalletConnected(true);
         setWalletAddress(address);
@@ -97,7 +106,7 @@ export function ConnectionStatus() {
           console.error('Error saving wallet address:', error);
           toast.error('Failed to save wallet address');
         } else {
-          toast.success('Wallet connected successfully', {
+          toast.success('Wallet connected successfully!', {
             description: `Connected to ${address.slice(0, 8)}...${address.slice(-6)}`,
           });
         }
@@ -108,11 +117,26 @@ export function ConnectionStatus() {
       }
     } catch (error) {
       console.error('Wallet connection failed:', error);
-      toast.error('Failed to connect wallet', {
-        description: 'Please try again and approve the connection request in Lace'
-      });
+      if (error.code === 4001) {
+        toast.error('Connection cancelled', {
+          description: 'You cancelled the wallet connection request'
+        });
+      } else {
+        toast.error('Failed to connect wallet', {
+          description: 'Please try again and approve the connection request in Lace'
+        });
+      }
     } finally {
       setConnecting(false);
+    }
+  };
+
+  const refreshLaceDetection = () => {
+    checkLaceInstalled();
+    if (laceInstalled) {
+      toast.success('Lace Wallet detected! You can now connect.');
+    } else {
+      toast.error('Lace Wallet still not detected. Please ensure it\'s installed and refresh the page.');
     }
   };
 
@@ -156,14 +180,34 @@ export function ConnectionStatus() {
             ) : (
               <>
                 <XCircle className="h-5 w-5 text-red-500" />
-                <Button 
-                  size="sm" 
-                  onClick={connectWallet}
-                  disabled={connecting}
-                >
-                  {connecting && <Loader2 className="mr-1 h-3 w-3 animate-spin" />}
-                  {laceInstalled ? 'Connect' : 'Install Lace'}
-                </Button>
+                {!laceInstalled ? (
+                  <div className="flex gap-2">
+                    <Button 
+                      size="sm" 
+                      onClick={openLaceWebsite}
+                      variant="outline"
+                    >
+                      <ExternalLink className="mr-1 h-3 w-3" />
+                      Install Lace
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      onClick={refreshLaceDetection}
+                      variant="ghost"
+                    >
+                      Refresh
+                    </Button>
+                  </div>
+                ) : (
+                  <Button 
+                    size="sm" 
+                    onClick={connectWallet}
+                    disabled={connecting}
+                  >
+                    {connecting && <Loader2 className="mr-1 h-3 w-3 animate-spin" />}
+                    Connect
+                  </Button>
+                )}
               </>
             )}
           </div>

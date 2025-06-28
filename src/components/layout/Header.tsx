@@ -1,4 +1,4 @@
-import { Bell, Menu, Wallet, X, LogOut, User } from "lucide-react";
+import { Bell, Menu, Wallet, X, LogOut, User, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useCallback, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -19,17 +19,19 @@ export function Header() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const checkLace = () => {
-      const isInstalled = typeof window.cardano !== 'undefined' && typeof window.cardano.lace !== 'undefined';
-      setIsLaceInstalled(isInstalled);
-    };
-    
-    checkLace();
-    
+    checkLaceInstalled();
     if (user) {
       checkExistingWalletConnection();
     }
   }, [user]);
+
+  const checkLaceInstalled = () => {
+    const isInstalled = typeof window !== 'undefined' && 
+                       typeof window.cardano !== 'undefined' && 
+                       typeof window.cardano.lace !== 'undefined';
+    setIsLaceInstalled(isInstalled);
+    console.log('Lace installed in header:', isInstalled);
+  };
 
   const checkExistingWalletConnection = async () => {
     if (!user) return;
@@ -51,58 +53,62 @@ export function Header() {
     }
   };
 
+  const openLaceWebsite = () => {
+    window.open('https://www.lace.io/', '_blank');
+  };
+
   const handleWalletConnect = useCallback(async () => {
+    if (!user) {
+      toast.error('Please sign in first');
+      return;
+    }
+
     if (!isLaceInstalled) {
-      toast.error(
-        "Lace wallet is required", 
-        {
-          description: "Please install Lace wallet to connect",
-          action: {
-            label: "Install Lace",
-            onClick: () => window.open('https://www.lace.io/', '_blank')
-          }
+      toast.error('Lace Wallet is not installed', {
+        description: 'Please install Lace Wallet to continue',
+        action: {
+          label: 'Install Lace',
+          onClick: openLaceWebsite
         }
-      );
+      });
       return;
     }
 
     setConnecting(true);
     try {
-      console.log('Attempting to connect to Lace wallet...');
+      console.log('Attempting to connect to Lace wallet from header...');
       const api = await window.cardano.lace.enable();
       console.log('Lace API enabled:', api);
       
       const addresses = await api.getUsedAddresses();
       console.log('Addresses retrieved:', addresses);
       
-      if (addresses.length > 0) {
+      if (addresses && addresses.length > 0) {
         const address = addresses[0];
         setIsWalletConnected(true);
         setWalletAddress(address);
         
         // Update user profile with wallet address
-        if (user) {
-          const { error } = await supabase
-            .from('profiles')
-            .upsert({ 
-              id: user.id, 
-              wallet_address: address 
-            });
+        const { error } = await supabase
+          .from('profiles')
+          .upsert({ 
+            id: user.id, 
+            wallet_address: address 
+          });
 
-          if (error) {
-            console.error('Error saving wallet address:', error);
-            toast.error('Failed to save wallet address');
-          } else {
-            toast.success("Lace wallet connected successfully!", {
-              description: `Connected with address ${address.slice(0, 8)}...${address.slice(-6)}`
-            });
+        if (error) {
+          console.error('Error saving wallet address:', error);
+          toast.error('Failed to save wallet address');
+        } else {
+          toast.success("Wallet connected successfully!", {
+            description: `Connected with address ${address.slice(0, 8)}...${address.slice(-6)}`
+          });
 
-            // Simulate Midnight connection after Cardano wallet connection
-            setTimeout(() => {
-              setMidnightConnected(true);
-              toast.success("Midnight network connected for private transactions");
-            }, 1000);
-          }
+          // Simulate Midnight connection after Cardano wallet connection
+          setTimeout(() => {
+            setMidnightConnected(true);
+            toast.success("Midnight network connected for private transactions");
+          }, 1000);
         }
       } else {
         toast.error('No wallet addresses found', {
@@ -111,9 +117,15 @@ export function Header() {
       }
     } catch (error) {
       console.error("Wallet connection failed:", error);
-      toast.error("Failed to connect Lace wallet", {
-        description: "Please try again and approve the connection request in Lace"
-      });
+      if (error.code === 4001) {
+        toast.error('Connection cancelled', {
+          description: 'You cancelled the wallet connection request'
+        });
+      } else {
+        toast.error("Failed to connect wallet", {
+          description: "Please try again and approve the connection request in Lace"
+        });
+      }
     } finally {
       setConnecting(false);
     }
@@ -151,6 +163,7 @@ export function Header() {
 
           {user ? (
             <>
+              
               <nav className="hidden md:flex space-x-8">
                 <Link to="/" className="text-muted-foreground hover:text-primary px-3 py-2 font-medium">Dashboard</Link>
                 <Link to="/identity" className="text-muted-foreground hover:text-primary px-3 py-2 font-medium">Identity</Link>
@@ -166,16 +179,38 @@ export function Header() {
                 </Button>
                 
                 {!isWalletConnected ? (
-                  <Button 
-                    onClick={handleWalletConnect}
-                    className="hidden md:flex items-center space-x-2 bg-primary hover:bg-primary/90"
-                    disabled={connecting}
-                  >
-                    <Wallet className="h-4 w-4" />
-                    <span>
-                      {connecting ? 'Connecting...' : (isLaceInstalled ? 'Connect Lace' : 'Install Lace')}
-                    </span>
-                  </Button>
+                  <div className="hidden md:flex items-center gap-2">
+                    {!isLaceInstalled ? (
+                      <>
+                        <Button 
+                          onClick={openLaceWebsite}
+                          variant="outline"
+                          size="sm"
+                        >
+                          <ExternalLink className="h-4 w-4 mr-2" />
+                          Install Lace
+                        </Button>
+                        <Button 
+                          onClick={checkLaceInstalled}
+                          variant="ghost"
+                          size="sm"
+                        >
+                          Refresh
+                        </Button>
+                      </>
+                    ) : (
+                      <Button 
+                        onClick={handleWalletConnect}
+                        className="bg-primary hover:bg-primary/90"
+                        disabled={connecting}
+                      >
+                        <Wallet className="h-4 w-4 mr-2" />
+                        <span>
+                          {connecting ? 'Connecting...' : 'Connect Lace'}
+                        </span>
+                      </Button>
+                    )}
+                  </div>
                 ) : (
                   <div className="hidden md:flex items-center space-x-2">
                     <div className="flex items-center space-x-2 px-3 py-2 bg-green-100 text-green-800 rounded-md text-sm">
@@ -226,6 +261,7 @@ export function Header() {
         </div>
       </div>
 
+      
       {mobileMenuOpen && user && (
         <div className="md:hidden border-t border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="px-2 pt-2 pb-3 space-y-1">
@@ -257,14 +293,43 @@ export function Header() {
             >
               Verification
             </Link>
-            <Button 
-              onClick={handleWalletConnect}
-              className="w-full mt-3 bg-primary hover:bg-primary/90"
-              disabled={connecting}
-            >
-              <Wallet className="h-4 w-4 mr-2" />
-              {connecting ? 'Connecting...' : (isWalletConnected ? 'Connected' : 'Connect Lace')}
-            </Button>
+            {!isWalletConnected ? (
+              !isLaceInstalled ? (
+                <div className="flex gap-2 mt-3">
+                  <Button 
+                    onClick={openLaceWebsite}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    Install Lace
+                  </Button>
+                  <Button 
+                    onClick={checkLaceInstalled}
+                    variant="ghost"
+                    className="flex-1"
+                  >
+                    Refresh
+                  </Button>
+                </div>
+              ) : (
+                <Button 
+                  onClick={handleWalletConnect}
+                  className="w-full mt-3 bg-primary hover:bg-primary/90"
+                  disabled={connecting}
+                >
+                  <Wallet className="h-4 w-4 mr-2" />
+                  {connecting ? 'Connecting...' : 'Connect Lace'}
+                </Button>
+              )
+            ) : (
+              <div className="mt-3 p-3 bg-green-100 text-green-800 rounded-md text-sm">
+                <div className="flex items-center">
+                  <Wallet className="h-4 w-4 mr-2" />
+                  <span>Connected: {formatAddress(walletAddress)}</span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
