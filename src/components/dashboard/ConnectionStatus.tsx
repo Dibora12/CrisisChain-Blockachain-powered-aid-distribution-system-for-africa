@@ -31,14 +31,11 @@ export function ConnectionStatus() {
   const checkWalletConnection = async () => {
     if (typeof window.cardano !== 'undefined' && window.cardano.lace) {
       try {
-        const isEnabled = await window.cardano.lace.isEnabled();
-        if (isEnabled) {
-          const api = await window.cardano.lace.enable();
-          const addresses = await api.getUsedAddresses();
-          if (addresses.length > 0) {
-            setWalletConnected(true);
-            setWalletAddress(addresses[0]);
-          }
+        const api = await window.cardano.lace.enable();
+        const addresses = await api.getUsedAddresses();
+        if (addresses.length > 0) {
+          setWalletConnected(true);
+          setWalletAddress(addresses[0]);
         }
       } catch (error) {
         setWalletConnected(false);
