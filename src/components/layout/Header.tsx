@@ -25,7 +25,31 @@ export function Header() {
     };
     
     checkLace();
-  }, []);
+    
+    if (user) {
+      checkExistingWalletConnection();
+    }
+  }, [user]);
+
+  const checkExistingWalletConnection = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('wallet_address')
+        .eq('id', user.id)
+        .single();
+      
+      if (data?.wallet_address) {
+        setWalletAddress(data.wallet_address);
+        setIsWalletConnected(true);
+        setMidnightConnected(true); // Simulate Midnight connection
+      }
+    } catch (error) {
+      console.log('No existing wallet address found');
+    }
+  };
 
   const handleWalletConnect = useCallback(async () => {
     if (!isLaceInstalled) {
@@ -44,8 +68,13 @@ export function Header() {
 
     setConnecting(true);
     try {
-      const api = await window.cardano.lace!.enable();
+      console.log('Attempting to connect to Lace wallet...');
+      const api = await window.cardano.lace.enable();
+      console.log('Lace API enabled:', api);
+      
       const addresses = await api.getUsedAddresses();
+      console.log('Addresses retrieved:', addresses);
+      
       if (addresses.length > 0) {
         const address = addresses[0];
         setIsWalletConnected(true);
@@ -53,26 +82,35 @@ export function Header() {
         
         // Update user profile with wallet address
         if (user) {
-          await supabase
+          const { error } = await supabase
             .from('profiles')
             .upsert({ 
               id: user.id, 
               wallet_address: address 
             });
-        }
-        
-        toast.success("Lace wallet connected successfully!", {
-          description: `Connected with address ${address.slice(0, 8)}...${address.slice(-6)}`
-        });
 
-        // Simulate Midnight connection after Cardano wallet connection
-        setTimeout(() => {
-          setMidnightConnected(true);
-          toast.success("Midnight network connected for private transactions");
-        }, 1000);
+          if (error) {
+            console.error('Error saving wallet address:', error);
+            toast.error('Failed to save wallet address');
+          } else {
+            toast.success("Lace wallet connected successfully!", {
+              description: `Connected with address ${address.slice(0, 8)}...${address.slice(-6)}`
+            });
+
+            // Simulate Midnight connection after Cardano wallet connection
+            setTimeout(() => {
+              setMidnightConnected(true);
+              toast.success("Midnight network connected for private transactions");
+            }, 1000);
+          }
+        }
+      } else {
+        toast.error('No wallet addresses found', {
+          description: 'Please ensure your Lace wallet has at least one address'
+        });
       }
     } catch (error) {
-      console.error("User denied wallet connection or error occurred:", error);
+      console.error("Wallet connection failed:", error);
       toast.error("Failed to connect Lace wallet", {
         description: "Please try again and approve the connection request in Lace"
       });

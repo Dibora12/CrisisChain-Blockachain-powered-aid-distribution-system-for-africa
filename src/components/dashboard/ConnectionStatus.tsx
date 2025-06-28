@@ -12,12 +12,14 @@ export function ConnectionStatus() {
   const [walletConnected, setWalletConnected] = useState(false);
   const [walletAddress, setWalletAddress] = useState<string>('');
   const [connecting, setConnecting] = useState(false);
+  const [laceInstalled, setLaceInstalled] = useState(false);
   const { user } = useAuth();
 
   useEffect(() => {
     checkSupabaseConnection();
-    checkWalletConnection();
-  }, []);
+    checkLaceInstalled();
+    checkExistingWalletAddress();
+  }, [user]);
 
   const checkSupabaseConnection = async () => {
     try {
@@ -28,18 +30,27 @@ export function ConnectionStatus() {
     }
   };
 
-  const checkWalletConnection = async () => {
-    if (typeof window.cardano !== 'undefined' && window.cardano.lace) {
-      try {
-        const api = await window.cardano.lace.enable();
-        const addresses = await api.getUsedAddresses();
-        if (addresses.length > 0) {
-          setWalletConnected(true);
-          setWalletAddress(addresses[0]);
-        }
-      } catch (error) {
-        setWalletConnected(false);
+  const checkLaceInstalled = () => {
+    const isInstalled = typeof window.cardano !== 'undefined' && window.cardano.lace;
+    setLaceInstalled(isInstalled);
+  };
+
+  const checkExistingWalletAddress = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('wallet_address')
+        .eq('id', user.id)
+        .single();
+      
+      if (data?.wallet_address) {
+        setWalletAddress(data.wallet_address);
+        setWalletConnected(true);
       }
+    } catch (error) {
+      console.log('No existing wallet address found');
     }
   };
 
@@ -49,17 +60,25 @@ export function ConnectionStatus() {
       return;
     }
 
+    if (!laceInstalled) {
+      toast.error('Lace wallet not found', {
+        description: 'Please install Lace wallet extension',
+        action: {
+          label: 'Install Lace',
+          onClick: () => window.open('https://www.lace.io/', '_blank')
+        }
+      });
+      return;
+    }
+
     setConnecting(true);
     try {
-      if (typeof window.cardano === 'undefined' || !window.cardano.lace) {
-        toast.error('Lace wallet not found', {
-          description: 'Please install Lace wallet extension',
-        });
-        return;
-      }
-
+      console.log('Attempting to connect to Lace wallet...');
       const api = await window.cardano.lace.enable();
+      console.log('Lace API enabled:', api);
+      
       const addresses = await api.getUsedAddresses();
+      console.log('Addresses retrieved:', addresses);
       
       if (addresses.length > 0) {
         const address = addresses[0];
@@ -67,21 +86,30 @@ export function ConnectionStatus() {
         setWalletAddress(address);
 
         // Save wallet address to user profile
-        await supabase
+        const { error } = await supabase
           .from('profiles')
           .upsert({ 
             id: user.id, 
             wallet_address: address 
           });
 
-        toast.success('Wallet connected successfully', {
-          description: `Connected to ${address.slice(0, 8)}...${address.slice(-6)}`,
+        if (error) {
+          console.error('Error saving wallet address:', error);
+          toast.error('Failed to save wallet address');
+        } else {
+          toast.success('Wallet connected successfully', {
+            description: `Connected to ${address.slice(0, 8)}...${address.slice(-6)}`,
+          });
+        }
+      } else {
+        toast.error('No wallet addresses found', {
+          description: 'Please ensure your Lace wallet has at least one address'
         });
       }
     } catch (error) {
       console.error('Wallet connection failed:', error);
       toast.error('Failed to connect wallet', {
-        description: 'Please try again and approve the connection',
+        description: 'Please try again and approve the connection request in Lace'
       });
     } finally {
       setConnecting(false);
@@ -115,7 +143,7 @@ export function ConnectionStatus() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Wallet className="h-4 w-4" />
-            <span>Midnight Wallet</span>
+            <span>Lace Wallet</span>
           </div>
           <div className="flex items-center gap-2">
             {walletConnected ? (
@@ -134,7 +162,7 @@ export function ConnectionStatus() {
                   disabled={connecting}
                 >
                   {connecting && <Loader2 className="mr-1 h-3 w-3 animate-spin" />}
-                  Connect
+                  {laceInstalled ? 'Connect' : 'Install Lace'}
                 </Button>
               </>
             )}
