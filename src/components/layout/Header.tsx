@@ -14,6 +14,7 @@ export function Header() {
   const [walletAddress, setWalletAddress] = useState<string>("");
   const [isLaceInstalled, setIsLaceInstalled] = useState(false);
   const [midnightConnected, setMidnightConnected] = useState(false);
+  const [connecting, setConnecting] = useState(false);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
@@ -41,6 +42,7 @@ export function Header() {
       return;
     }
 
+    setConnecting(true);
     try {
       const api = await window.cardano.lace!.enable();
       const addresses = await api.getUsedAddresses();
@@ -74,6 +76,8 @@ export function Header() {
       toast.error("Failed to connect Lace wallet", {
         description: "Please try again and approve the connection request in Lace"
       });
+    } finally {
+      setConnecting(false);
     }
   }, [isLaceInstalled, user]);
 
@@ -127,10 +131,11 @@ export function Header() {
                   <Button 
                     onClick={handleWalletConnect}
                     className="hidden md:flex items-center space-x-2 bg-primary hover:bg-primary/90"
+                    disabled={connecting}
                   >
                     <Wallet className="h-4 w-4" />
                     <span>
-                      {isLaceInstalled ? 'Connect Lace' : 'Install Lace'}
+                      {connecting ? 'Connecting...' : (isLaceInstalled ? 'Connect Lace' : 'Install Lace')}
                     </span>
                   </Button>
                 ) : (
@@ -217,9 +222,10 @@ export function Header() {
             <Button 
               onClick={handleWalletConnect}
               className="w-full mt-3 bg-primary hover:bg-primary/90"
+              disabled={connecting}
             >
               <Wallet className="h-4 w-4 mr-2" />
-              {isWalletConnected ? 'Connected' : 'Connect Lace'}
+              {connecting ? 'Connecting...' : (isWalletConnected ? 'Connected' : 'Connect Lace')}
             </Button>
           </div>
         </div>

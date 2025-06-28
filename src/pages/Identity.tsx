@@ -1,4 +1,3 @@
-
 import { 
   Users, Search, Filter, Plus, Download, ArrowUpDown, 
   ArrowRight, Fingerprint, QrCode, Link 
@@ -7,6 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CrisisIDCard } from "@/components/identity/CrisisIDCard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { NewRegistrationDialog } from "@/components/dialogs/NewRegistrationDialog";
+import { ConnectionStatus } from "@/components/dashboard/ConnectionStatus";
+import { exportIdentityData } from "@/utils/exportUtils";
+import { toast } from "sonner";
+import { useState } from "react";
 
 // Mock data for recipients
 const recipients = [
@@ -53,6 +57,23 @@ const recipients = [
 ];
 
 export default function Identity() {
+  const [newRegistrationOpen, setNewRegistrationOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      await exportIdentityData();
+      toast.success('Identity data exported successfully');
+    } catch (error) {
+      toast.error('Failed to export data', {
+        description: 'Please try again'
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col md:flex-row items-start justify-between mb-6">
@@ -61,11 +82,19 @@ export default function Identity() {
           <p className="text-chai-gray mt-1">Secure blockchain-based identities for crisis-affected individuals</p>
         </div>
         <div className="flex space-x-3 mt-4 md:mt-0">
-          <Button variant="outline" className="flex items-center">
+          <Button 
+            variant="outline" 
+            className="flex items-center"
+            onClick={handleExport}
+            disabled={isExporting}
+          >
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
-          <Button className="flex items-center bg-chai-blue hover:bg-chai-darkblue">
+          <Button 
+            className="flex items-center bg-chai-blue hover:bg-chai-darkblue"
+            onClick={() => setNewRegistrationOpen(true)}
+          >
             <Plus className="h-4 w-4 mr-2" />
             New Registration
           </Button>
@@ -221,6 +250,10 @@ export default function Identity() {
         </div>
       </div>
       
+      <div className="mb-8">
+        <ConnectionStatus />
+      </div>
+      
       <Card className="bg-chai-lightblue/10 border-chai-lightblue/30">
         <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row items-center">
@@ -237,6 +270,11 @@ export default function Identity() {
           </div>
         </CardContent>
       </Card>
+      
+      <NewRegistrationDialog 
+        open={newRegistrationOpen} 
+        onOpenChange={setNewRegistrationOpen} 
+      />
     </div>
   );
 }

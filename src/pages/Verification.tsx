@@ -1,4 +1,3 @@
-
 import { 
   Users, UserCheck, Search, Shield, Fingerprint, 
   CheckCircle, Settings, Filter, Clock 
@@ -8,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CommunityVerificationPanel } from "@/components/verification/CommunityVerificationPanel";
+import { VerifyIdentityDialog } from "@/components/dialogs/VerifyIdentityDialog";
+import { useState } from "react";
 
 // Mock data for verification requests
 const verificationRequests = [
@@ -68,6 +69,12 @@ const verificationRequests = [
 ];
 
 export default function Verification() {
+  const [verifyIdentityOpen, setVerifyIdentityOpen] = useState(false);
+
+  const handleApplyNow = () => {
+    setVerifyIdentityOpen(true);
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col md:flex-row items-start justify-between mb-6">
@@ -80,9 +87,12 @@ export default function Verification() {
             <Shield className="h-4 w-4 mr-2" />
             Verifier Portal
           </Button>
-          <Button className="flex items-center bg-chai-blue hover:bg-chai-darkblue">
+          <Button 
+            className="flex items-center bg-chai-blue hover:bg-chai-darkblue"
+            onClick={handleApplyNow}
+          >
             <UserCheck className="h-4 w-4 mr-2" />
-            Join as Verifier
+            Apply Now
           </Button>
         </div>
       </div>
@@ -289,12 +299,20 @@ export default function Verification() {
               <h3 className="font-bold text-lg text-chai-darkblue">Become a Community Verifier</h3>
               <p className="text-chai-gray">Help your community by verifying identities and enabling aid distribution.</p>
             </div>
-            <Button className="bg-chai-green hover:bg-chai-green/90 text-white">
+            <Button 
+              className="bg-chai-green hover:bg-chai-green/90 text-white"
+              onClick={handleApplyNow}
+            >
               Apply Now
             </Button>
           </div>
         </CardContent>
       </Card>
+      
+      <VerifyIdentityDialog 
+        open={verifyIdentityOpen} 
+        onOpenChange={setVerifyIdentityOpen} 
+      />
     </div>
   );
 }
