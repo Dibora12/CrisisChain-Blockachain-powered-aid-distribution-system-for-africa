@@ -266,6 +266,45 @@ export type Database = {
         }
         Relationships: []
       }
+      tokens: {
+        Row: {
+          contract_address: string | null
+          created_at: string
+          creator_id: string | null
+          id: string
+          is_active: boolean | null
+          midnight_tx_hash: string | null
+          name: string
+          supply: number
+          symbol: string
+          updated_at: string
+        }
+        Insert: {
+          contract_address?: string | null
+          created_at?: string
+          creator_id?: string | null
+          id?: string
+          is_active?: boolean | null
+          midnight_tx_hash?: string | null
+          name: string
+          supply?: number
+          symbol: string
+          updated_at?: string
+        }
+        Update: {
+          contract_address?: string | null
+          created_at?: string
+          creator_id?: string | null
+          id?: string
+          is_active?: boolean | null
+          midnight_tx_hash?: string | null
+          name?: string
+          supply?: number
+          symbol?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_verifications: {
         Row: {
           created_at: string
@@ -315,6 +354,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      verifier_applications: {
+        Row: {
+          created_at: string
+          full_name: string
+          id: string
+          midnight_tx_hash: string | null
+          motivation: string
+          status: string | null
+          updated_at: string
+          user_id: string | null
+          zk_proof_hash: string | null
+          zk_verified: boolean | null
+        }
+        Insert: {
+          created_at?: string
+          full_name: string
+          id?: string
+          midnight_tx_hash?: string | null
+          motivation: string
+          status?: string | null
+          updated_at?: string
+          user_id?: string | null
+          zk_proof_hash?: string | null
+          zk_verified?: boolean | null
+        }
+        Update: {
+          created_at?: string
+          full_name?: string
+          id?: string
+          midnight_tx_hash?: string | null
+          motivation?: string
+          status?: string | null
+          updated_at?: string
+          user_id?: string | null
+          zk_proof_hash?: string | null
+          zk_verified?: boolean | null
+        }
+        Relationships: []
       }
       verifiers: {
         Row: {

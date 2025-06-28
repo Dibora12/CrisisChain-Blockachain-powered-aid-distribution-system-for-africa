@@ -3,16 +3,56 @@ import { StatCard } from "@/components/dashboard/StatCard";
 import { AidDistributionMap } from "@/components/dashboard/AidDistributionMap";
 import { DistributionChart } from "@/components/dashboard/DistributionChart";
 import { RecentTransactions } from "@/components/dashboard/RecentTransactions";
+import { ConnectionStatus } from "@/components/dashboard/ConnectionStatus";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
+import { useState } from "react";
 import { 
   Users, ShieldCheck, CreditCard, BarChart4, Fingerprint, 
   DownloadCloud, ListChecks, ArrowRight 
 } from "lucide-react";
+import { VerifyIdentityDialog } from "@/components/dialogs/VerifyIdentityDialog";
+import { DistributeAidDialog } from "@/components/dialogs/DistributeAidDialog";
+import { CreateTokenDialog } from "@/components/dialogs/CreateTokenDialog";
+import { useCreateAidRequest } from "@/hooks/useAidRequests";
+import { toast } from "sonner";
 
 export default function Index() {
   const { user } = useAuth();
+  const [verifyIdentityOpen, setVerifyIdentityOpen] = useState(false);
+  const [distributeAidOpen, setDistributeAidOpen] = useState(false);
+  const [createTokenOpen, setCreateTokenOpen] = useState(false);
+  
+  const createAidRequest = useCreateAidRequest();
+
+  const handleJoinVerification = async () => {
+    if (!user) {
+      toast.error('Please sign in first');
+      return;
+    }
+    setVerifyIdentityOpen(true);
+  };
+
+  const handleApplyForAid = async () => {
+    if (!user) {
+      toast.error('Please sign in first');
+      return;
+    }
+
+    // Simple aid application with default values
+    try {
+      await createAidRequest.mutateAsync({
+        request_type: 'emergency',
+        amount: 100,
+        location: 'Current Location',
+        description: 'Emergency aid request from dashboard',
+        urgency_level: 5,
+      });
+    } catch (error) {
+      console.error('Failed to create aid request:', error);
+    }
+  };
 
   if (!user) {
     return (
@@ -128,12 +168,20 @@ export default function Index() {
         <RecentTransactions />
       </div>
       
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <ConnectionStatus />
+      </div>
+      
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
         <div className="bg-gradient-to-br from-chai-blue to-chai-darkblue rounded-lg p-6 text-white">
           <Fingerprint className="h-10 w-10 mb-4" />
           <h3 className="text-xl font-bold mb-2">Crisis ID Verification</h3>
           <p className="mb-4 opacity-90">Secure, biometric-based identity verification for displaced individuals.</p>
-          <Button variant="outline" className="bg-white/10 border-white/30 hover:bg-white/20 text-white">
+          <Button 
+            variant="outline" 
+            className="bg-white/10 border-white/30 hover:bg-white/20 text-white"
+            onClick={() => setVerifyIdentityOpen(true)}
+          >
             <span>Verify Identity</span>
             <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
@@ -143,7 +191,11 @@ export default function Index() {
           <CreditCard className="h-10 w-10 mb-4" />
           <h3 className="text-xl font-bold mb-2">Aid Token Distribution</h3>
           <p className="mb-4 opacity-90">Stablecoin-like tokens for essential needs distribution with smart contracts.</p>
-          <Button variant="outline" className="bg-white/10 border-white/30 hover:bg-white/20 text-white">
+          <Button 
+            variant="outline" 
+            className="bg-white/10 border-white/30 hover:bg-white/20 text-white"
+            onClick={() => setDistributeAidOpen(true)}
+          >
             <span>Distribute Aid</span>
             <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
@@ -153,8 +205,43 @@ export default function Index() {
           <Users className="h-10 w-10 mb-4" />
           <h3 className="text-xl font-bold mb-2">Community Verification</h3>
           <p className="mb-4 opacity-90">Leveraging community leaders and witnesses for DAO-based identity verification.</p>
-          <Button variant="outline" className="bg-white/10 border-white/30 hover:bg-white/20 text-white">
+          <Button 
+            variant="outline" 
+            className="bg-white/10 border-white/30 hover:bg-white/20 text-white"
+            onClick={handleJoinVerification}
+          >
             <span>Join Verification</span>
+            <ArrowRight className="h-4 w-4 ml-2" />
+          </Button>
+        </div>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        <div className="bg-gradient-to-br from-purple-600 to-purple-800 rounded-lg p-6 text-white">
+          <CreditCard className="h-10 w-10 mb-4" />
+          <h3 className="text-xl font-bold mb-2">Create First Token</h3>
+          <p className="mb-4 opacity-90">Deploy your first privacy token on the Midnight network for secure aid distribution.</p>
+          <Button 
+            variant="outline" 
+            className="bg-white/10 border-white/30 hover:bg-white/20 text-white"
+            onClick={() => setCreateTokenOpen(true)}
+          >
+            <span>Create Token</span>
+            <ArrowRight className="h-4 w-4 ml-2" />
+          </Button>
+        </div>
+        
+        <div className="bg-gradient-to-br from-red-600 to-red-800 rounded-lg p-6 text-white">
+          <Users className="h-10 w-10 mb-4" />
+          <h3 className="text-xl font-bold mb-2">Apply for Aid</h3>
+          <p className="mb-4 opacity-90">Submit an emergency aid request to receive assistance through the network.</p>
+          <Button 
+            variant="outline" 
+            className="bg-white/10 border-white/30 hover:bg-white/20 text-white"
+            onClick={handleApplyForAid}
+            disabled={createAidRequest.isPending}
+          >
+            <span>Apply Now</span>
             <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
         </div>
@@ -163,9 +250,9 @@ export default function Index() {
       <div className="bg-chai-lightgray rounded-lg p-6 mb-8">
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="mb-4 md:mb-0">
-            <h2 className="text-xl font-bold text-chai-darkblue">Polygon Network Integration</h2>
+            <h2 className="text-xl font-bold text-chai-darkblue">Midnight Network Integration</h2>
             <p className="text-chai-gray max-w-2xl mt-1">
-              CrisisChai uses Polygon's low-cost, eco-friendly blockchain to securely distribute aid in humanitarian crises.
+              CrisisChain uses Midnight's privacy-preserving blockchain to securely distribute aid while protecting recipient privacy.
             </p>
           </div>
           <div className="flex space-x-3">
@@ -174,6 +261,19 @@ export default function Index() {
           </div>
         </div>
       </div>
+
+      <VerifyIdentityDialog 
+        open={verifyIdentityOpen} 
+        onOpenChange={setVerifyIdentityOpen} 
+      />
+      <DistributeAidDialog 
+        open={distributeAidOpen} 
+        onOpenChange={setDistributeAidOpen} 
+      />
+      <CreateTokenDialog 
+        open={createTokenOpen} 
+        onOpenChange={setCreateTokenOpen} 
+      />
     </div>
   );
 }
