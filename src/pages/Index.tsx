@@ -1,5 +1,4 @@
 
-import { useState } from "react";
 import { StatCard } from "@/components/dashboard/StatCard";
 import { RecentTransactions } from "@/components/dashboard/RecentTransactions";
 import { DistributionChart } from "@/components/dashboard/DistributionChart";
@@ -24,33 +23,29 @@ export default function Index() {
         <StatCard
           title="Active Recipients"
           value="2,847"
-          icon={<Users className="h-6 w-6" />}
-          trend="+12%"
-          trendDirection="up"
+          icon={Users}
+          trend={{ value: 12, positive: true }}
           description="Verified individuals receiving aid"
         />
         <StatCard
           title="Aid Distributed"
           value="$284,923"
-          icon={<CreditCard className="h-6 w-6" />}
-          trend="+8%"
-          trendDirection="up"
+          icon={CreditCard}
+          trend={{ value: 8, positive: true }}
           description="Total value distributed this month"
         />
         <StatCard
           title="Active Locations"
           value="47"
-          icon={<MapPin className="h-6 w-6" />}
-          trend="+3"
-          trendDirection="up"
+          icon={MapPin}
+          trend={{ value: 3, positive: true }}
           description="Crisis zones currently served"
         />
         <StatCard
           title="Privacy Rate"
           value="98.7%"
-          icon={<TrendingUp className="h-6 w-6" />}
-          trend="+0.3%"
-          trendDirection="up"
+          icon={TrendingUp}
+          trend={{ value: 0.3, positive: true }}
           description="Transactions with zero-knowledge protection"
         />
       </div>
