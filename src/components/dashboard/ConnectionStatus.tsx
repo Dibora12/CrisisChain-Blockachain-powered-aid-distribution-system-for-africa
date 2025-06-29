@@ -1,10 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle, XCircle, Loader2, Wallet, Database, ExternalLink } from 'lucide-react';
+import { CheckCircle, XCircle, Loader2, Wallet, Database, ExternalLink, Cpu } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSmartContracts } from '@/hooks/useSmartContracts';
 import { toast } from 'sonner';
 
 export function ConnectionStatus() {
@@ -14,6 +14,7 @@ export function ConnectionStatus() {
   const [connecting, setConnecting] = useState(false);
   const [laceInstalled, setLaceInstalled] = useState(false);
   const { user } = useAuth();
+  const { isConnected: smartContractConnected, initializeClient, isLoading: contractLoading } = useSmartContracts();
 
   useEffect(() => {
     checkSupabaseConnection();
@@ -109,6 +110,14 @@ export function ConnectionStatus() {
           toast.success('Wallet connected successfully!', {
             description: `Connected to ${address.slice(0, 8)}...${address.slice(-6)}`,
           });
+
+          // Initialize smart contracts after wallet connection
+          try {
+            await initializeClient();
+          } catch (contractError) {
+            console.error('Failed to initialize smart contracts:', contractError);
+            toast.error('Wallet connected but smart contracts failed to initialize');
+          }
         }
       } else {
         toast.error('No wallet addresses found', {
@@ -208,6 +217,31 @@ export function ConnectionStatus() {
                     Connect
                   </Button>
                 )}
+              </>
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Cpu className="h-4 w-4" />
+            <span>Smart Contracts</span>
+          </div>
+          <div className="flex items-center gap-2">
+            {smartContractConnected ? (
+              <>
+                <CheckCircle className="h-5 w-5 text-green-500" />
+                <span className="text-xs text-muted-foreground">
+                  Midnight Network
+                </span>
+              </>
+            ) : (
+              <>
+                <XCircle className="h-5 w-5 text-red-500" />
+                {contractLoading && <Loader2 className="h-3 w-3 animate-spin" />}
+                <span className="text-xs text-muted-foreground">
+                  {walletConnected ? 'Connecting...' : 'Requires Wallet'}
+                </span>
               </>
             )}
           </div>

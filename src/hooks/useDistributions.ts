@@ -2,6 +2,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSmartContracts } from '@/hooks/useSmartContracts';
 import { toast } from 'sonner';
 
 export interface Distribution {
@@ -42,6 +43,7 @@ export const useDistributions = () => {
 export const useCreateDistribution = () => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const { distributeTokens, initializeClient, isConnected } = useSmartContracts();
 
   return useMutation({
     mutationFn: async (distribution: Partial<Distribution>) => {
@@ -51,10 +53,34 @@ export const useCreateDistribution = () => {
       if (!distribution.aid_request_id || !distribution.recipient_id || !distribution.amount) {
         throw new Error('Aid request ID, recipient ID, and amount are required');
       }
-      
-      // Simulate Midnight blockchain transaction
-      const midnightTxHash = `midnight_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
+
+      // Get the token contract address (assuming we have a default token)
+      const { data: tokens } = await supabase
+        .from('tokens')
+        .select('contract_address')
+        .eq('is_active', true)
+        .limit(1);
+
+      if (!tokens || tokens.length === 0) {
+        throw new Error('No active tokens found. Please create a token first.');
+      }
+
+      const tokenAddress = tokens[0].contract_address;
+
+      // Initialize smart contract client if not connected
+      if (!isConnected) {
+        await initializeClient();
+      }
+
+      // Execute the distribution through smart contract
+      const txHash = await distributeTokens({
+        tokenAddress,
+        recipient: distribution.recipient_id,
+        amount: distribution.amount,
+        memo: distribution.shielded_memo,
+      });
+
+      // Save distribution record to database
       const { data, error } = await supabase
         .from('distributions')
         .insert({
@@ -62,35 +88,40 @@ export const useCreateDistribution = () => {
           distributor_id: user.id,
           recipient_id: distribution.recipient_id,
           amount: distribution.amount,
-          token_contract_address: distribution.token_contract_address,
-          midnight_tx_hash: midnightTxHash,
+          token_contract_address: tokenAddress,
+          midnight_tx_hash: txHash,
           shielded_memo: distribution.shielded_memo,
-          status: 'pending',
+          status: 'confirmed',
+          distributed_at: new Date().toISOString(),
         })
         .select()
         .single();
       
       if (error) throw error;
       
-      // Log midnight transaction
+      // Log the real transaction
       await supabase.from('midnight_transactions').insert({
-        tx_hash: midnightTxHash,
+        tx_hash: txHash,
         tx_type: 'distribution',
         from_address: user.id,
         to_address: distribution.recipient_id,
         amount: distribution.amount,
         shielded: true,
         status: 'confirmed',
+        metadata: {
+          token_contract_address: tokenAddress,
+          aid_request_id: distribution.aid_request_id,
+        },
       });
       
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['distributions'] });
-      toast.success('Distribution created with Midnight privacy protection');
+      toast.success('Distribution executed successfully with Midnight privacy protection');
     },
     onError: (error) => {
-      toast.error('Failed to create distribution', {
+      toast.error('Failed to execute distribution', {
         description: error.message,
       });
     },

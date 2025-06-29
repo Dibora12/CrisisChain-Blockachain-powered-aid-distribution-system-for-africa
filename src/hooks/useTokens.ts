@@ -2,6 +2,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSmartContracts } from '@/hooks/useSmartContracts';
 import { toast } from 'sonner';
 
 export interface Token {
@@ -36,15 +37,26 @@ export const useTokens = () => {
 export const useCreateToken = () => {
   const queryClient = useQueryClient();
   const { user } = useAuth();
+  const { deployToken, initializeClient, isConnected } = useSmartContracts();
 
   return useMutation({
     mutationFn: async (token: { name: string; symbol: string; supply: number }) => {
       if (!user) throw new Error('User not authenticated');
       
-      // Simulate Midnight smart contract deployment
-      const contractAddress = `midnight_contract_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      const midnightTxHash = `mint_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      // Initialize smart contract client if not connected
+      if (!isConnected) {
+        await initializeClient();
+      }
 
+      // Deploy the smart contract
+      const deployment = await deployToken({
+        name: token.name,
+        symbol: token.symbol,
+        totalSupply: token.supply,
+        creator: user.id,
+      });
+
+      // Save to database with real contract details
       const { data, error } = await supabase
         .from('tokens')
         .insert({
@@ -52,14 +64,31 @@ export const useCreateToken = () => {
           name: token.name,
           symbol: token.symbol,
           supply: token.supply,
-          contract_address: contractAddress,
-          midnight_tx_hash: midnightTxHash,
+          contract_address: deployment.contractAddress,
+          midnight_tx_hash: deployment.transactionHash,
           is_active: true,
         })
         .select()
         .single();
       
       if (error) throw error;
+      
+      // Log the real transaction
+      await supabase.from('midnight_transactions').insert({
+        tx_hash: deployment.transactionHash,
+        tx_type: 'token_creation',
+        from_address: user.id,
+        amount: token.supply,
+        block_height: deployment.blockNumber,
+        shielded: true,
+        status: 'confirmed',
+        metadata: { 
+          contract_address: deployment.contractAddress,
+          token_name: token.name,
+          token_symbol: token.symbol 
+        },
+      });
+      
       return data;
     },
     onSuccess: (data) => {
