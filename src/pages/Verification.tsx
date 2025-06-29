@@ -1,6 +1,7 @@
+
 import { 
   Users, UserCheck, Search, Shield, Fingerprint, 
-  CheckCircle, Settings, Filter, Clock 
+  CheckCircle, Settings, Filter, Clock, HandHeart 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CommunityVerificationPanel } from "@/components/verification/CommunityVerificationPanel";
 import { VerifyIdentityDialog } from "@/components/dialogs/VerifyIdentityDialog";
+import { NewRegistrationDialog } from "@/components/dialogs/NewRegistrationDialog";
 import { useState } from "react";
 
 // Mock data for verification requests
@@ -70,25 +72,37 @@ const verificationRequests = [
 
 export default function Verification() {
   const [verifyIdentityOpen, setVerifyIdentityOpen] = useState(false);
+  const [applyForAidOpen, setApplyForAidOpen] = useState(false);
 
   const handleApplyNow = () => {
     setVerifyIdentityOpen(true);
+  };
+
+  const handleApplyForAid = () => {
+    setApplyForAidOpen(true);
   };
 
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col md:flex-row items-start justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-chai-darkblue">Community Verification</h1>
-          <p className="text-chai-gray mt-1">DAO-based verification by community witnesses and elders</p>
+          <h1 className="text-3xl font-bold text-foreground">Community Verification</h1>
+          <p className="text-muted-foreground mt-1">DAO-based verification by community witnesses and elders</p>
         </div>
         <div className="flex space-x-3 mt-4 md:mt-0">
-          <Button variant="outline" className="flex items-center">
+          <Button 
+            onClick={handleApplyForAid}
+            className="flex items-center bg-green-600 hover:bg-green-700 text-white"
+          >
+            <HandHeart className="h-4 w-4 mr-2" />
+            Apply for Aid
+          </Button>
+          <Button variant="outline" className="flex items-center border-border text-foreground hover:bg-muted">
             <Shield className="h-4 w-4 mr-2" />
             Verifier Portal
           </Button>
           <Button 
-            className="flex items-center bg-chai-blue hover:bg-chai-darkblue"
+            className="flex items-center bg-primary text-primary-foreground hover:bg-primary/90"
             onClick={handleApplyNow}
           >
             <UserCheck className="h-4 w-4 mr-2" />
@@ -96,19 +110,41 @@ export default function Verification() {
           </Button>
         </div>
       </div>
+
+      <div className="mb-6">
+        <Card className="border-green-200 bg-green-50 dark:bg-green-950/20 dark:border-green-800">
+          <CardContent className="pt-6">
+            <div className="flex flex-col md:flex-row items-center">
+              <div className="mb-4 md:mb-0 md:mr-6">
+                <HandHeart className="h-10 w-10 text-green-600 dark:text-green-400" />
+              </div>
+              <div className="flex-grow text-center md:text-left mb-4 md:mb-0">
+                <h3 className="font-bold text-lg text-green-800 dark:text-green-200">Need Aid? Apply Here</h3>
+                <p className="text-green-700 dark:text-green-300">Submit your aid request with privacy protection through zero-knowledge proofs.</p>
+              </div>
+              <Button 
+                onClick={handleApplyForAid}
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                Apply for Aid
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        <Card>
+        <Card className="bg-card border-border">
           <CardHeader className="pb-3">
-            <CardTitle className="flex items-center">
-              <Users className="h-5 w-5 mr-2 text-chai-blue" />
+            <CardTitle className="flex items-center text-foreground">
+              <Users className="h-5 w-5 mr-2 text-blue-600" />
               Active Verifiers
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">438</div>
-            <p className="text-sm text-chai-gray">Community witnesses</p>
-            <div className="flex items-center mt-2 text-chai-green text-sm">
+            <div className="text-3xl font-bold text-foreground">438</div>
+            <p className="text-sm text-muted-foreground">Community witnesses</p>
+            <div className="flex items-center mt-2 text-green-600 text-sm">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-1">
                 <path d="M7 17l5-5 5 5M7 7l5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
@@ -117,17 +153,17 @@ export default function Verification() {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="bg-card border-border">
           <CardHeader className="pb-3">
-            <CardTitle className="flex items-center">
-              <CheckCircle className="h-5 w-5 mr-2 text-chai-green" />
+            <CardTitle className="flex items-center text-foreground">
+              <CheckCircle className="h-5 w-5 mr-2 text-green-600" />
               Successful Verifications
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">28,389</div>
-            <p className="text-sm text-chai-gray">Identities verified</p>
-            <div className="flex items-center mt-2 text-chai-green text-sm">
+            <div className="text-3xl font-bold text-foreground">28,389</div>
+            <p className="text-sm text-muted-foreground">Identities verified</p>
+            <div className="flex items-center mt-2 text-green-600 text-sm">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-1">
                 <path d="M7 17l5-5 5 5M7 7l5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
@@ -136,87 +172,87 @@ export default function Verification() {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="bg-card border-border">
           <CardHeader className="pb-3">
-            <CardTitle className="flex items-center">
-              <Clock className="h-5 w-5 mr-2 text-chai-orange" />
+            <CardTitle className="flex items-center text-foreground">
+              <Clock className="h-5 w-5 mr-2 text-orange-600" />
               Pending Verifications
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold">146</div>
-            <p className="text-sm text-chai-gray">Awaiting verification</p>
-            <div className="mt-2 text-chai-orange text-sm">
+            <div className="text-3xl font-bold text-foreground">146</div>
+            <p className="text-sm text-muted-foreground">Awaiting verification</p>
+            <div className="mt-2 text-orange-600 text-sm">
               Avg. time: 8.2 hours
             </div>
           </CardContent>
         </Card>
       </div>
       
-      <Card className="mb-8">
+      <Card className="mb-8 bg-card border-border">
         <CardHeader>
-          <CardTitle>Verification Process</CardTitle>
-          <CardDescription>How community-based verification works</CardDescription>
+          <CardTitle className="text-foreground">Verification Process</CardTitle>
+          <CardDescription className="text-muted-foreground">How community-based verification works</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col lg:flex-row gap-8 items-center">
             <div className="flex-grow">
               <div className="relative">
-                <div className="hidden md:block absolute z-0 top-1/2 left-[35px] right-[35px] h-0.5 bg-gray-200"></div>
+                <div className="hidden md:block absolute z-0 top-1/2 left-[35px] right-[35px] h-0.5 bg-border"></div>
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 relative z-10">
                   <div className="flex flex-col items-center text-center">
-                    <div className="w-16 h-16 rounded-full bg-chai-blue/10 flex items-center justify-center mb-3">
-                      <Fingerprint className="h-8 w-8 text-chai-blue" />
+                    <div className="w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-950/20 flex items-center justify-center mb-3">
+                      <Fingerprint className="h-8 w-8 text-blue-600" />
                     </div>
-                    <h3 className="font-medium mb-1">Identity Claim</h3>
-                    <p className="text-xs text-chai-gray">Individual requests identity verification</p>
+                    <h3 className="font-medium mb-1 text-foreground">Identity Claim</h3>
+                    <p className="text-xs text-muted-foreground">Individual requests identity verification</p>
                   </div>
                   
                   <div className="flex flex-col items-center text-center">
-                    <div className="w-16 h-16 rounded-full bg-chai-orange/10 flex items-center justify-center mb-3">
-                      <Users className="h-8 w-8 text-chai-orange" />
+                    <div className="w-16 h-16 rounded-full bg-orange-100 dark:bg-orange-950/20 flex items-center justify-center mb-3">
+                      <Users className="h-8 w-8 text-orange-600" />
                     </div>
-                    <h3 className="font-medium mb-1">Witness Gathering</h3>
-                    <p className="text-xs text-chai-gray">Community elders and approved witnesses are notified</p>
+                    <h3 className="font-medium mb-1 text-foreground">Witness Gathering</h3>
+                    <p className="text-xs text-muted-foreground">Community elders and approved witnesses are notified</p>
                   </div>
                   
                   <div className="flex flex-col items-center text-center">
-                    <div className="w-16 h-16 rounded-full bg-chai-green/10 flex items-center justify-center mb-3">
-                      <UserCheck className="h-8 w-8 text-chai-green" />
+                    <div className="w-16 h-16 rounded-full bg-green-100 dark:bg-green-950/20 flex items-center justify-center mb-3">
+                      <UserCheck className="h-8 w-8 text-green-600" />
                     </div>
-                    <h3 className="font-medium mb-1">DAO Voting</h3>
-                    <p className="text-xs text-chai-gray">Witnesses vote to confirm identity</p>
+                    <h3 className="font-medium mb-1 text-foreground">DAO Voting</h3>
+                    <p className="text-xs text-muted-foreground">Witnesses vote to confirm identity</p>
                   </div>
                   
                   <div className="flex flex-col items-center text-center">
-                    <div className="w-16 h-16 rounded-full bg-chai-darkblue/10 flex items-center justify-center mb-3">
-                      <Shield className="h-8 w-8 text-chai-darkblue" />
+                    <div className="w-16 h-16 rounded-full bg-purple-100 dark:bg-purple-950/20 flex items-center justify-center mb-3">
+                      <Shield className="h-8 w-8 text-purple-600" />
                     </div>
-                    <h3 className="font-medium mb-1">Blockchain Record</h3>
-                    <p className="text-xs text-chai-gray">Identity is permanently recorded on blockchain</p>
+                    <h3 className="font-medium mb-1 text-foreground">Blockchain Record</h3>
+                    <p className="text-xs text-muted-foreground">Identity is permanently recorded on blockchain</p>
                   </div>
                 </div>
               </div>
             </div>
             
-            <div className="lg:w-1/3 bg-chai-lightgray p-4 rounded-lg">
-              <h3 className="font-medium mb-2">Benefits of Community Verification</h3>
+            <div className="lg:w-1/3 bg-muted p-4 rounded-lg">
+              <h3 className="font-medium mb-2 text-foreground">Benefits of Community Verification</h3>
               <ul className="space-y-2 text-sm">
                 <li className="flex items-start">
-                  <CheckCircle className="h-4 w-4 text-chai-green mr-2 mt-0.5" />
-                  <span>Works in regions with limited technology access</span>
+                  <CheckCircle className="h-4 w-4 text-green-600 mr-2 mt-0.5" />
+                  <span className="text-muted-foreground">Works in regions with limited technology access</span>
                 </li>
                 <li className="flex items-start">
-                  <CheckCircle className="h-4 w-4 text-chai-green mr-2 mt-0.5" />
-                  <span>Leverages existing community trust networks</span>
+                  <CheckCircle className="h-4 w-4 text-green-600 mr-2 mt-0.5" />
+                  <span className="text-muted-foreground">Leverages existing community trust networks</span>
                 </li>
                 <li className="flex items-start">
-                  <CheckCircle className="h-4 w-4 text-chai-green mr-2 mt-0.5" />
-                  <span>Prevents fraud through multiple independent witnesses</span>
+                  <CheckCircle className="h-4 w-4 text-green-600 mr-2 mt-0.5" />
+                  <span className="text-muted-foreground">Prevents fraud through multiple independent witnesses</span>
                 </li>
                 <li className="flex items-start">
-                  <CheckCircle className="h-4 w-4 text-chai-green mr-2 mt-0.5" />
-                  <span>Creates immutable blockchain record of verification</span>
+                  <CheckCircle className="h-4 w-4 text-green-600 mr-2 mt-0.5" />
+                  <span className="text-muted-foreground">Creates immutable blockchain record of verification</span>
                 </li>
               </ul>
             </div>
@@ -227,12 +263,12 @@ export default function Verification() {
       <div className="mb-6">
         <Tabs defaultValue="pending">
           <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
-            <TabsList>
-              <TabsTrigger value="pending" className="flex items-center">
+            <TabsList className="bg-muted">
+              <TabsTrigger value="pending" className="flex items-center data-[state=active]:bg-background data-[state=active]:text-foreground">
                 <Clock className="h-4 w-4 mr-2" />
                 <span>Pending</span>
               </TabsTrigger>
-              <TabsTrigger value="verified" className="flex items-center">
+              <TabsTrigger value="verified" className="flex items-center data-[state=active]:bg-background data-[state=active]:text-foreground">
                 <CheckCircle className="h-4 w-4 mr-2" />
                 <span>Verified</span>
               </TabsTrigger>
@@ -243,13 +279,13 @@ export default function Verification() {
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input 
                   placeholder="Search verifications..." 
-                  className="w-full pl-8"
+                  className="w-full pl-8 bg-background border-border text-foreground"
                 />
               </div>
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" className="border-border text-foreground hover:bg-muted">
                 <Filter className="h-4 w-4" />
               </Button>
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" className="border-border text-foreground hover:bg-muted">
                 <Settings className="h-4 w-4" />
               </Button>
             </div>
@@ -289,18 +325,18 @@ export default function Verification() {
         </Tabs>
       </div>
       
-      <Card className="bg-gradient-to-r from-chai-green/20 to-chai-green/5 border-chai-green/30">
+      <Card className="bg-gradient-to-r from-green-100 to-green-50 dark:from-green-950/20 dark:to-green-900/20 border-green-200 dark:border-green-800">
         <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row items-center">
             <div className="mb-4 md:mb-0 md:mr-6">
-              <UserCheck className="h-10 w-10 text-chai-green" />
+              <UserCheck className="h-10 w-10 text-green-600 dark:text-green-400" />
             </div>
             <div className="flex-grow text-center md:text-left mb-4 md:mb-0">
-              <h3 className="font-bold text-lg text-chai-darkblue">Become a Community Verifier</h3>
-              <p className="text-chai-gray">Help your community by verifying identities and enabling aid distribution.</p>
+              <h3 className="font-bold text-lg text-green-800 dark:text-green-200">Become a Community Verifier</h3>
+              <p className="text-green-700 dark:text-green-300">Help your community by verifying identities and enabling aid distribution.</p>
             </div>
             <Button 
-              className="bg-chai-green hover:bg-chai-green/90 text-white"
+              className="bg-green-600 hover:bg-green-700 text-white"
               onClick={handleApplyNow}
             >
               Apply Now
@@ -312,6 +348,11 @@ export default function Verification() {
       <VerifyIdentityDialog 
         open={verifyIdentityOpen} 
         onOpenChange={setVerifyIdentityOpen} 
+      />
+      
+      <NewRegistrationDialog 
+        open={applyForAidOpen} 
+        onOpenChange={setApplyForAidOpen} 
       />
     </div>
   );
