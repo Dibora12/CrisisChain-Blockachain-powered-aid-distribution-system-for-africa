@@ -91,7 +91,7 @@ export const useCreateDistribution = () => {
           token_contract_address: tokenAddress,
           midnight_tx_hash: txHash,
           shielded_memo: distribution.shielded_memo,
-          status: 'confirmed',
+          status: 'completed', // Changed from 'confirmed' to 'completed'
           distributed_at: new Date().toISOString(),
         })
         .select()
