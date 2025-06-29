@@ -1,4 +1,3 @@
-
 import { StatCard } from "@/components/dashboard/StatCard";
 import { RecentTransactions } from "@/components/dashboard/RecentTransactions";
 import { DistributionChart } from "@/components/dashboard/DistributionChart";
@@ -52,63 +51,69 @@ export default function Index() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <Card className="bg-card border-border">
-          <CardHeader>
-            <CardTitle className="flex items-center text-foreground">
-              <Shield className="h-5 w-5 mr-2 text-blue-600" />
+        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-900/20 border-blue-200 dark:border-blue-800 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center text-blue-900 dark:text-blue-100">
+              <div className="p-2 bg-blue-600 rounded-lg mr-3">
+                <Shield className="h-5 w-5 text-white" />
+              </div>
               Crisis ID Verification
             </CardTitle>
-            <CardDescription className="text-muted-foreground">
+            <CardDescription className="text-blue-700 dark:text-blue-300">
               Secure identity verification using zero-knowledge proofs
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="text-sm text-blue-600 dark:text-blue-400 mb-4 leading-relaxed">
               Verify your identity privately while maintaining anonymity through advanced cryptographic methods.
             </p>
-            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg transition-all duration-200">
               <Shield className="h-4 w-4 mr-2" />
               Verify Identity
             </Button>
           </CardContent>
         </Card>
 
-        <Card className="bg-card border-border">
-          <CardHeader>
-            <CardTitle className="flex items-center text-foreground">
-              <CreditCard className="h-5 w-5 mr-2 text-green-600" />
+        <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/30 dark:to-green-900/20 border-green-200 dark:border-green-800 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center text-green-900 dark:text-green-100">
+              <div className="p-2 bg-green-600 rounded-lg mr-3">
+                <CreditCard className="h-5 w-5 text-white" />
+              </div>
               Aid Token Distribution
             </CardTitle>
-            <CardDescription className="text-muted-foreground">
+            <CardDescription className="text-green-700 dark:text-green-300">
               Distribute aid tokens to verified recipients
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="text-sm text-green-600 dark:text-green-400 mb-4 leading-relaxed">
               Create and distribute privacy-preserving aid tokens powered by Midnight blockchain technology.
             </p>
-            <Button className="w-full bg-green-600 hover:bg-green-700 text-white">
+            <Button className="w-full bg-green-600 hover:bg-green-700 text-white shadow-md hover:shadow-lg transition-all duration-200">
               <CreditCard className="h-4 w-4 mr-2" />
               Distribute Aid
             </Button>
           </CardContent>
         </Card>
 
-        <Card className="bg-card border-border">
-          <CardHeader>
-            <CardTitle className="flex items-center text-foreground">
-              <UserCheck className="h-5 w-5 mr-2 text-purple-600" />
+        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/30 dark:to-purple-900/20 border-purple-200 dark:border-purple-800 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center text-purple-900 dark:text-purple-100">
+              <div className="p-2 bg-purple-600 rounded-lg mr-3">
+                <UserCheck className="h-5 w-5 text-white" />
+              </div>
               Community Verification
             </CardTitle>
-            <CardDescription className="text-muted-foreground">
+            <CardDescription className="text-purple-700 dark:text-purple-300">
               DAO-based verification by community witnesses
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="text-sm text-purple-600 dark:text-purple-400 mb-4 leading-relaxed">
               Participate in community-driven verification processes to help establish trust and legitimacy.
             </p>
-            <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white">
+            <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white shadow-md hover:shadow-lg transition-all duration-200">
               <UserCheck className="h-4 w-4 mr-2" />
               Join Verification
             </Button>
