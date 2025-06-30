@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "./components/layout/Layout";
 import { ThemeProvider } from "./components/theme/ThemeProvider";
 import { AuthProvider } from "./contexts/AuthContext";
+import GetStarted from "./pages/GetStarted";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Identity from "./pages/Identity";
@@ -25,6 +26,7 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
+              <Route path="/get-started" element={<GetStarted />} />
               <Route path="/auth" element={<Auth />} />
               <Route element={<Layout />}>
                 <Route path="/" element={<Index />} />

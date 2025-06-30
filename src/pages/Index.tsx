@@ -1,8 +1,8 @@
-import { StatCard } from "@/components/dashboard/StatCard";
-import { RecentTransactions } from "@/components/dashboard/RecentTransactions";
-import { DistributionChart } from "@/components/dashboard/DistributionChart";
-import { AidDistributionMap } from "@/components/dashboard/AidDistributionMap";
-import { ConnectionStatus } from "@/components/dashboard/ConnectionStatus";
+import { StatCard } from "@/components/off-chain/dashboard/StatCard";
+import { RecentTransactions } from "@/components/off-chain/dashboard/RecentTransactions";
+import { DistributionChart } from "@/components/off-chain/dashboard/DistributionChart";
+import { AidDistributionMap } from "@/components/off-chain/dashboard/AidDistributionMap";
+import { ConnectionStatus } from "@/components/off-chain/dashboard/ConnectionStatus";
 import { CreditCard, Users, MapPin, TrendingUp, Shield, UserCheck, HandHeart } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
